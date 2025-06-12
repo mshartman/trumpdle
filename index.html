@@ -120,9 +120,8 @@
   <div class="score" id="scoreDisplay"></div>
 
   <script>
-    // Daily quote data
     const quoteText = "All Federal Funding will stop for any College, School, or University that allows illegal protests. Agitators will be imprisoned/or permanently sent back to the country from which they came. American students will be permanently expelled or, depending on on the crime, arrested. No masks! Thank you for your attention to this matter.";
-    const correctWords = ["stop", "no", "masks"];
+    const correctWords = ["stop", "no", "masks"];  // lowercase for consistency
     const maxSelections = correctWords.length;
 
     let selectedCount = 0;
@@ -140,10 +139,13 @@
       const words = quoteText.split(" ");
       words.forEach((word, i) => {
         const span = document.createElement("span");
-        const cleanWord = word.replace(/[.,]/g, '');
+
+        // Remove all trailing punctuation for matching purposes
+        const cleanWord = word.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?"'\[\]]+/g, '').toLowerCase();
+
         span.className = "word";
         span.dataset.original = word;
-        span.dataset.clean = cleanWord.toLowerCase();
+        span.dataset.clean = cleanWord;
         span.textContent = word;
         span.onclick = () => toggleWord(span);
         quoteContainer.appendChild(span);
@@ -167,8 +169,11 @@
         span.classList.remove("capitalized", "correct", "incorrect");
         selectedCount--;
       } else {
+        // Re-apply capitalization while preserving trailing punctuation
+        const original = span.dataset.original;
         const clean = span.dataset.clean.toUpperCase();
-        const punct = /[.,]$/.test(span.dataset.original) ? span.dataset.original.slice(-1) : '';
+        const punctMatch = original.match(/[^a-zA-Z0-9]+$/);
+        const punct = punctMatch ? punctMatch[0] : '';
         span.textContent = clean + punct;
         span.classList.add("capitalized");
         selectedCount++;
@@ -199,15 +204,13 @@
             score++;
           } else {
             span.classList.add("incorrect");
-            score--; // penalty
+            score--;
           }
         }
       });
 
-      // Prevent negative score
       if (score < 0) score = 0;
 
-      // Show unselected correct words
       correctWords.forEach(word => {
         if (!selectedWords.includes(word)) {
           const span = [...spans].find(s => s.dataset.clean === word);

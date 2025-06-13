@@ -38,6 +38,36 @@
       width: 100%;
     }
 
+    .post-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1.2rem;
+    }
+
+    .avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      margin-right: 12px;
+    }
+
+    .user-info .name {
+      font-weight: 600;
+      color: #111827;
+      font-size: 1rem;
+    }
+
+    .user-info .verified {
+      color: #e0245e;
+      font-size: 1rem;
+      margin-left: 4px;
+    }
+
+    .user-info .handle {
+      font-size: 0.95rem;
+      color: #6b7280;
+    }
+
     #quote {
       font-size: 1.4rem;
       line-height: 2rem;
@@ -47,8 +77,8 @@
 
     .word {
       display: inline;
-      padding: 3px 6px;
-      margin-right: 4px;
+      padding: 3px 4px;
+      margin: 0;
       border-radius: 6px;
       transition: all 0.2s ease;
       cursor: pointer;
@@ -109,6 +139,13 @@
   <div class="instruction" id="instructions"></div>
 
   <div class="post">
+    <div class="post-header">
+      <img class="avatar" src="trump.png" alt="Trump profile picture" />
+      <div class="user-info">
+        <div class="name">Donald J. Trump <span class="verified">✔</span></div>
+        <div class="handle">@realDonaldTrump</div>
+      </div>
+    </div>
     <div id="quote"></div>
   </div>
 
@@ -120,9 +157,9 @@
   <div class="score" id="scoreDisplay"></div>
 
   <script>
-    const quoteText = "All Federal Funding will stop for any College, School, or University that allows illegal protests. Agitators will be imprisoned/or permanently sent back to the country from which they came. American students will be permanently expelled or, depending on on the crime, arrested. No masks! Thank you for your attention to this matter.";
-    const correctWords = ["stop", "no", "masks"];
-    const maxSelections = correctWords.length;
+    const quoteText = "I gave Iran chance after chance to make a deal. I told them, in the strongest of words, to “just do it,” but no matter how hard they tried, no matter how close they got, they just couldn’t get it done. I told them it would be much worse than anything they know, anticipated, or were told, that the United States makes the best and most lethal military equipment anywhere in the World, by far, and that Israel has a lot of it, with much more to come - And they know how to use it. Certain Iranian hardliner’s spoke bravely, but they didn’t know what was about to happen. They are all dead now, and it will only get worse! There has already been great death and destruction, but there is still time to make this slaughter, with the next already planned attacks being even more brutal, come to an end. Iran must make a deal, before there is nothing left, and save what was once known as the Iranian Empire. No more death, no more destruction, just do it, before it is too late. God Bless You All!";
+    const correctWordIndices = [73, 74, 113, 178, 179, 180, 181, 182, 183, 184, 185];
+    const maxSelections = correctWordIndices.length;
 
     let selectedCount = 0;
     const quoteContainer = document.getElementById("quote");
@@ -134,22 +171,27 @@
       scoreDisplay.innerHTML = "";
       selectedCount = 0;
 
-      instructionDiv.textContent = `Highlight ${maxSelections} word${maxSelections > 1 ? "s" : ""} in the quote below by clicking on them.`;
+      instructionDiv.textContent = `Trump went all caps for ${maxSelections} word${maxSelections > 1 ? "s" : ""} in this Truth Social post. Select them below by clicking on each word.`;
 
       const words = quoteText.split(" ");
       words.forEach((word, i) => {
         const span = document.createElement("span");
-
-        // Strip all non-alphanumeric characters for clean matching
         const cleanWord = word.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
 
         span.className = "word";
         span.dataset.original = word;
         span.dataset.clean = cleanWord;
+        span.dataset.index = i;
         span.textContent = word;
-        span.onclick = () => toggleWord(span);
-        quoteContainer.appendChild(span);
 
+        if (word !== "I") {
+          span.onclick = () => toggleWord(span);
+        } else {
+          span.style.cursor = "default";
+          span.style.opacity = "0.6";
+        }
+
+        quoteContainer.appendChild(span);
         if (i < words.length - 1) {
           quoteContainer.appendChild(document.createTextNode(" "));
         }
@@ -187,18 +229,18 @@
       let score = 0;
       const spans = document.querySelectorAll(".word");
 
-      const correctSet = new Set(correctWords);
-      const selectedWords = [];
+      const correctSet = new Set(correctWordIndices.map(i => i.toString()));
+      const selectedIndices = [];
 
       spans.forEach(span => {
         span.classList.remove("correct", "incorrect");
 
         const isCap = span.classList.contains("capitalized");
-        const word = span.dataset.clean;
+        const index = span.dataset.index;
 
         if (isCap) {
-          selectedWords.push(word);
-          if (correctSet.has(word)) {
+          selectedIndices.push(index);
+          if (correctSet.has(index)) {
             span.classList.add("correct");
             score++;
           } else {
@@ -210,16 +252,14 @@
 
       if (score < 0) score = 0;
 
-      correctWords.forEach(word => {
-        if (!selectedWords.includes(word)) {
-          const span = [...spans].find(s => s.dataset.clean === word);
-          if (span) {
-            span.classList.add("correct");
-          }
+      correctWordIndices.forEach(i => {
+        const span = [...spans].find(s => s.dataset.index === i.toString());
+        if (span && !span.classList.contains("capitalized")) {
+          span.classList.add("correct");
         }
       });
 
-      scoreDisplay.innerHTML = `Your score: <strong>${score}</strong> out of ${correctWords.length}`;
+      scoreDisplay.innerHTML = `Your score: <strong>${score}</strong> out of ${correctWordIndices.length}`;
     }
 
     window.onload = loadQuote;

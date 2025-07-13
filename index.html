@@ -156,127 +156,134 @@
 
   <div class="score" id="scoreDisplay"></div>
 
-  <script>
-    const quoteText = "Zero Border crossings for the month for TRUMP, verses 60,000 for Sleepy, Crooked Joe Biden, a man who lost the 2020 Presidential Election by a 'LANDSLIDE!' Biden was grossly incompetent, and the 2020 election was a total FRAUD! The evidence is MASSIVE and OVERWHELMING. A Special Prosecutor must be appointed. This cannot be allowed to happen again in the United States of America! Let the work begin! What this Crooked man, and his CORRUPT CRONIES, have done to our Country in 4 years, is grossly indescribable! MAKE AMERICA GREAT AGAIN!";
+ <script>
+  const originalQuote = "Zero Border crossings for the month for TRUMP, verses 60,000 for Sleepy, Crooked Joe Biden, a man who lost the 2020 Presidential Election by a 'LANDSLIDE!' Biden was grossly incompetent, and the 2020 election was a total FRAUD! The evidence is MASSIVE and OVERWHELMING. A Special Prosecutor must be appointed. This cannot be allowed to happen again in the United States of America! Let the work begin! What this Crooked man, and his CORRUPT CRONIES, have done to our Country in 4 years, is grossly indescribable! MAKE AMERICA GREAT AGAIN!";
 
-    let correctWordIndices = [];
-    let selectedCount = 0;
+  let correctWordIndices = [];
+  let selectedCount = 0;
 
-    const quoteContainer = document.getElementById("quote");
-    const instructionDiv = document.getElementById("instructions");
-    const scoreDisplay = document.getElementById("scoreDisplay");
+  const quoteContainer = document.getElementById("quote");
+  const instructionDiv = document.getElementById("instructions");
+  const scoreDisplay = document.getElementById("scoreDisplay");
 
-    function getAllCapsIndices(words) {
-      const indices = [];
-      words.forEach((word, i) => {
-        const clean = word.replace(/[^A-Za-z0-9]/g, "");
-        if (clean.length > 1 && clean === clean.toUpperCase()) {
-          indices.push(i);
-        }
-      });
-      return indices;
-    }
-
-    function loadQuote() {
-      quoteContainer.innerHTML = "";
-      scoreDisplay.innerHTML = "";
-      selectedCount = 0;
-
-      const words = quoteText.split(" ");
-      correctWordIndices = getAllCapsIndices(words);
-
-      instructionDiv.textContent = `Trump went all caps for ${correctWordIndices.length} word${correctWordIndices.length !== 1 ? "s" : ""} in this Truth Social post. Select them below by clicking on each word.`;
-
-      words.forEach((word, i) => {
-        const span = document.createElement("span");
-        const cleanWord = word.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
-
-        span.className = "word";
-        span.dataset.original = word;
-        span.dataset.clean = cleanWord;
-        span.dataset.index = i;
-        span.textContent = word;
-
-        if (word !== "I") {
-          span.onclick = () => toggleWord(span);
-        } else {
-          span.style.cursor = "default";
-          span.style.opacity = "0.6";
-        }
-
-        quoteContainer.appendChild(span);
-        if (i < words.length - 1) {
-          quoteContainer.appendChild(document.createTextNode(" "));
-        }
-      });
-    }
-
-    function toggleWord(span) {
-      const isCap = span.classList.contains("capitalized");
-
-      if (!isCap && selectedCount >= correctWordIndices.length) {
-        alert(`You can only select ${correctWordIndices.length} word${correctWordIndices.length !== 1 ? "s" : ""}.`);
-        return;
+  function getAllCapsIndices(words) {
+    const indices = [];
+    words.forEach((word, i) => {
+      const clean = word.replace(/[^A-Za-z0-9]/g, "");
+      if (clean.length > 1 && clean === clean.toUpperCase()) {
+        indices.push(i);
       }
+    });
+    return indices;
+  }
+
+  function toSentenceCase(word) {
+    const clean = word.replace(/[^A-Za-z0-9]/g, "");
+    const rest = word.slice(clean.length);
+    return clean.charAt(0).toUpperCase() + clean.slice(1).toLowerCase() + rest;
+  }
+
+  function loadQuote() {
+    quoteContainer.innerHTML = "";
+    scoreDisplay.innerHTML = "";
+    selectedCount = 0;
+
+    const words = originalQuote.split(" ");
+    correctWordIndices = getAllCapsIndices(words);
+
+    instructionDiv.textContent = `Trump went all caps for ${correctWordIndices.length} word${correctWordIndices.length !== 1 ? "s" : ""} in this Truth Social post. Select them below by clicking on each word.`;
+
+    words.forEach((word, i) => {
+      const span = document.createElement("span");
+      span.className = "word";
+      span.dataset.original = word;
+      span.dataset.index = i;
+
+      const sentenceCase = toSentenceCase(word);
+      span.textContent = sentenceCase;
+
+      if (word !== "I") {
+        span.onclick = () => toggleWord(span);
+      } else {
+        span.style.cursor = "default";
+        span.style.opacity = "0.6";
+      }
+
+      quoteContainer.appendChild(span);
+      if (i < words.length - 1) {
+        quoteContainer.appendChild(document.createTextNode(" "));
+      }
+    });
+  }
+
+  function toggleWord(span) {
+    const isCap = span.classList.contains("capitalized");
+
+    if (!isCap && selectedCount >= correctWordIndices.length) {
+      alert(`You can only select ${correctWordIndices.length} word${correctWordIndices.length !== 1 ? "s" : ""}.`);
+      return;
+    }
+
+    if (isCap) {
+      span.textContent = toSentenceCase(span.dataset.original);
+      span.classList.remove("capitalized", "correct", "incorrect");
+      selectedCount--;
+    } else {
+      const base = span.dataset.original.replace(/[^a-zA-Z0-9]+$/, '').toUpperCase();
+      const punctMatch = span.dataset.original.match(/[^a-zA-Z0-9]+$/);
+      const punct = punctMatch ? punctMatch[0] : '';
+      span.textContent = base + punct;
+      span.classList.add("capitalized");
+      selectedCount++;
+    }
+  }
+
+  function resetQuote() {
+    loadQuote();
+  }
+
+  function checkAnswer() {
+    let score = 0;
+    const spans = document.querySelectorAll(".word");
+    const correctSet = new Set(correctWordIndices.map(i => i.toString()));
+
+    spans.forEach(span => {
+      span.classList.remove("correct", "incorrect");
+
+      const isCap = span.classList.contains("capitalized");
+      const index = span.dataset.index;
 
       if (isCap) {
-        span.textContent = span.dataset.original;
-        span.classList.remove("capitalized", "correct", "incorrect");
-        selectedCount--;
-      } else {
-        const original = span.dataset.original;
-        const base = span.dataset.clean.toUpperCase();
-        const punctMatch = original.match(/[^a-zA-Z0-9]+$/);
+        if (correctSet.has(index)) {
+          span.classList.add("correct");
+          score++;
+        } else {
+          span.classList.add("incorrect");
+          score--;
+        }
+      }
+    });
+
+    if (score < 0) score = 0;
+
+    // Reveal missed correct answers
+    correctWordIndices.forEach(i => {
+      const span = [...spans].find(s => s.dataset.index === i.toString());
+      if (span && !span.classList.contains("capitalized")) {
+        span.classList.add("correct");
+        const base = span.dataset.original.replace(/[^a-zA-Z0-9]+$/, '').toUpperCase();
+        const punctMatch = span.dataset.original.match(/[^a-zA-Z0-9]+$/);
         const punct = punctMatch ? punctMatch[0] : '';
         span.textContent = base + punct;
-        span.classList.add("capitalized");
-        selectedCount++;
       }
-    }
+    });
 
-    function resetQuote() {
-      loadQuote();
-    }
+    scoreDisplay.innerHTML = `Your score: <strong>${score}</strong> out of ${correctWordIndices.length}`;
+  }
 
-    function checkAnswer() {
-      let score = 0;
-      const spans = document.querySelectorAll(".word");
+  window.onload = loadQuote;
+</script>
 
-      const correctSet = new Set(correctWordIndices.map(i => i.toString()));
-      const selectedIndices = [];
-
-      spans.forEach(span => {
-        span.classList.remove("correct", "incorrect");
-
-        const isCap = span.classList.contains("capitalized");
-        const index = span.dataset.index;
-
-        if (isCap) {
-          selectedIndices.push(index);
-          if (correctSet.has(index)) {
-            span.classList.add("correct");
-            score++;
-          } else {
-            span.classList.add("incorrect");
-            score--;
-          }
-        }
-      });
-
-      if (score < 0) score = 0;
-
-      correctWordIndices.forEach(i => {
-        const span = [...spans].find(s => s.dataset.index === i.toString());
-        if (span && !span.classList.contains("capitalized")) {
-          span.classList.add("correct");
-        }
-      });
-
-      scoreDisplay.innerHTML = `Your score: <strong>${score}</strong> out of ${correctWordIndices.length}`;
-    }
-
-    window.onload = loadQuote;
-  </script>
 
 </body>
 <footer style="margin-top: 3rem; font-size: 0.9rem; color: #6b7280; text-align: center;">

@@ -156,7 +156,7 @@
 
   <div class="score" id="scoreDisplay"></div>
 
- <script>
+<script>
   const originalQuote = "Zero Border crossings for the month for TRUMP, verses 60,000 for Sleepy, Crooked Joe Biden, a man who lost the 2020 Presidential Election by a 'LANDSLIDE!' Biden was grossly incompetent, and the 2020 election was a total FRAUD! The evidence is MASSIVE and OVERWHELMING. A Special Prosecutor must be appointed. This cannot be allowed to happen again in the United States of America! Let the work begin! What this Crooked man, and his CORRUPT CRONIES, have done to our Country in 4 years, is grossly indescribable! MAKE AMERICA GREAT AGAIN!";
 
   let correctWordIndices = [];
@@ -198,9 +198,7 @@
       span.className = "word";
       span.dataset.original = word;
       span.dataset.index = i;
-
-      const sentenceCase = toSentenceCase(word);
-      span.textContent = sentenceCase;
+      span.textContent = toSentenceCase(word);
 
       if (word !== "I") {
         span.onclick = () => toggleWord(span);
@@ -238,37 +236,30 @@
     }
   }
 
-  function resetQuote() {
-    loadQuote();
-  }
-
   function checkAnswer() {
     let score = 0;
     const spans = document.querySelectorAll(".word");
-    const correctSet = new Set(correctWordIndices.map(i => i.toString()));
+    const correctSet = new Set(correctWordIndices);
 
     spans.forEach(span => {
       span.classList.remove("correct", "incorrect");
 
-      const isCap = span.classList.contains("capitalized");
-      const index = span.dataset.index;
+      const index = parseInt(span.dataset.index);
+      const isSelected = span.classList.contains("capitalized");
 
-      if (isCap) {
+      if (isSelected) {
         if (correctSet.has(index)) {
           span.classList.add("correct");
           score++;
         } else {
           span.classList.add("incorrect");
-          score--;
         }
       }
     });
 
-    if (score < 0) score = 0;
-
-    // Reveal missed correct answers
+    // Highlight missed ones
     correctWordIndices.forEach(i => {
-      const span = [...spans].find(s => s.dataset.index === i.toString());
+      const span = [...spans].find(s => parseInt(s.dataset.index) === i);
       if (span && !span.classList.contains("capitalized")) {
         span.classList.add("correct");
         const base = span.dataset.original.replace(/[^a-zA-Z0-9]+$/, '').toUpperCase();
@@ -283,7 +274,6 @@
 
   window.onload = loadQuote;
 </script>
-
 
 </body>
 <footer style="margin-top: 3rem; font-size: 0.9rem; color: #6b7280; text-align: center;">

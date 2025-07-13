@@ -157,23 +157,36 @@
   <div class="score" id="scoreDisplay"></div>
 
   <script>
-    const quoteText = "I gave Iran chance after chance to make a deal. I told them, in the strongest of words, to “just do it,” but no matter how hard they tried, no matter how close they got, they just couldn’t get it done. I told them it would be much worse than anything they know, anticipated, or were told, that the United States makes the best and most lethal military equipment anywhere in the World, by far, and that Israel has a lot of it, with much more to come - And they know how to use it. Certain Iranian hardliner’s spoke bravely, but they didn’t know what was about to happen. They are all dead now, and it will only get worse! There has already been great death and destruction, but there is still time to make this slaughter, with the next already planned attacks being even more brutal, come to an end. Iran must make a deal, before there is nothing left, and save what was once known as the Iranian Empire. No more death, no more destruction, just do it, before it is too late. God Bless You All!";
-    const correctWordIndices = [73, 74, 113, 178, 179, 180, 181, 182, 183, 184, 185];
-    const maxSelections = correctWordIndices.length;
+    const quoteText = "Zero Border crossings for the month for TRUMP, verses 60,000 for Sleepy, Crooked Joe Biden, a man who lost the 2020 Presidential Election by a 'LANDSLIDE!' Biden was grossly incompetent, and the 2020 election was a total FRAUD! The evidence is MASSIVE and OVERWHELMING. A Special Prosecutor must be appointed. This cannot be allowed to happen again in the United States of America! Let the work begin! What this Crooked man, and his CORRUPT CRONIES, have done to our Country in 4 years, is grossly indescribable! MAKE AMERICA GREAT AGAIN!";
 
+    let correctWordIndices = [];
     let selectedCount = 0;
+
     const quoteContainer = document.getElementById("quote");
     const instructionDiv = document.getElementById("instructions");
     const scoreDisplay = document.getElementById("scoreDisplay");
+
+    function getAllCapsIndices(words) {
+      const indices = [];
+      words.forEach((word, i) => {
+        const clean = word.replace(/[^A-Za-z0-9]/g, "");
+        if (clean.length > 1 && clean === clean.toUpperCase()) {
+          indices.push(i);
+        }
+      });
+      return indices;
+    }
 
     function loadQuote() {
       quoteContainer.innerHTML = "";
       scoreDisplay.innerHTML = "";
       selectedCount = 0;
 
-      instructionDiv.textContent = `Trump went all caps for ${maxSelections} word${maxSelections > 1 ? "s" : ""} in this Truth Social post. Select them below by clicking on each word.`;
-
       const words = quoteText.split(" ");
+      correctWordIndices = getAllCapsIndices(words);
+
+      instructionDiv.textContent = `Trump went all caps for ${correctWordIndices.length} word${correctWordIndices.length !== 1 ? "s" : ""} in this Truth Social post. Select them below by clicking on each word.`;
+
       words.forEach((word, i) => {
         const span = document.createElement("span");
         const cleanWord = word.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
@@ -201,8 +214,8 @@
     function toggleWord(span) {
       const isCap = span.classList.contains("capitalized");
 
-      if (!isCap && selectedCount >= maxSelections) {
-        alert(`You can only select ${maxSelections} word${maxSelections > 1 ? "s" : ""}.`);
+      if (!isCap && selectedCount >= correctWordIndices.length) {
+        alert(`You can only select ${correctWordIndices.length} word${correctWordIndices.length !== 1 ? "s" : ""}.`);
         return;
       }
 
@@ -266,4 +279,8 @@
   </script>
 
 </body>
+<footer style="margin-top: 3rem; font-size: 0.9rem; color: #6b7280; text-align: center;">
+ &copy; 2025 Matt Hartman and Salerno. All rights reserved. Please contact Salerno for any questions or concerns
+</footer>
+
 </html>
